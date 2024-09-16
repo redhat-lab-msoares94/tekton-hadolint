@@ -1,0 +1,30 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: hadolint-pipelinerun
+spec:
+  pipelineRef:
+    name: hadolint-pipeline
+  params:
+    - name: repository
+      value: https://github.com/redhat-lab-msoares94/tekton-hadolint.git
+    - name: ignore-rules
+      value: 'DL3001,DL3003'
+    - name: error-rules
+      value: 'DL3006'
+    - name: warning-rules
+      value: 'DL3026'
+    - name: info-rules
+      value: ''
+    - name: style-rules
+      value: ''
+    - name: containerfile-path
+      value: './Containerfile'
+    - name: trusted-registries
+      value: 'registry.redhat.io,registry.access.redhat.com'
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: hadolint-pvc
+---

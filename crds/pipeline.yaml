@@ -1,0 +1,70 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: hadolint-pipeline
+spec:
+  params:
+    - name: repository
+      description: "URL of the git repository"
+      type: string
+    - name: containerfile-path
+      description: "Path to the Dockerfile or Containerfile"
+      type: string
+    - name: ignore-rules
+      description: "Comma-separated list of rules to ignore"
+      type: string
+    - name: error-rules
+      description: "Comma-separated list of rules to treat as errors"
+      type: string
+    - name: warning-rules
+      description: "Comma-separated list of rules to treat as warnings"
+      type: string
+    - name: info-rules
+      description: "Comma-separated list of rules to treat as info"
+      type: string
+    - name: style-rules
+      description: "Comma-separated list of rules to treat as style"
+      type: string
+    - name: trusted-registries
+      description: "Comma-separated list of trusted registries"
+      type: string
+  workspaces:
+    - name: source
+  tasks:
+    - name: clone-git-repo
+      workspaces:
+        - name: output
+          workspace: source
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.repository)
+        - name: deleteExisting
+          value: "true"
+
+    - name: hadolint
+      taskRef:
+        kind: ClusterTask
+        name: hadolint
+      runAfter:
+        - clone-git-repo
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: ignore-rules
+          value: $(params.ignore-rules)
+        - name: error-rules
+          value: $(params.error-rules)
+        - name: warning-rules
+          value: $(params.warning-rules)
+        - name: info-rules
+          value: $(params.info-rules)
+        - name: style-rules
+          value: $(params.style-rules)
+        - name: containerfile-path
+          value: $(params.containerfile-path)
+        - name: trusted-registries
+          value: $(params.trusted-registries)

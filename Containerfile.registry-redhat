@@ -1,0 +1,1 @@
+FROM registry.redhat.io/rhel9/nginx-120@sha256:028a8de6cd23cf15fba4bd812784867d80e534b5682fdfea2743f44ec2812db7

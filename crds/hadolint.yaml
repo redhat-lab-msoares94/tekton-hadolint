@@ -1,0 +1,123 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  annotations:
+    tekton.dev/categories: Code Quality
+    tekton.dev/displayName: Hadolint
+    tekton.dev/pipelines.minVersion: 0.12.1
+    tekton.dev/platforms: linux/amd64
+    tekton.dev/tags: 'Kubernetes, Misconfiguration'
+  name: hadolint
+  labels:
+    app.kubernetes.io/version: '0.1'
+spec:
+  description: >-
+    This task makes it possible to use Hadolint within Tekton Pipeline.
+
+    A smarter Dockerfile linter that helps you build best practice Docker
+    images. The linter parses the Dockerfile into an AST and performs rules on
+    top of the AST.
+  params:
+    - default: ''
+      description: Ignore rules (comma-separated).
+      name: ignore-rules
+      type: string
+    - default: ''
+      description: Treat rules as error (comma-separated).
+      name: error-rules
+      type: string
+    - default: ''
+      description: Treat rules as warning (comma-separated).
+      name: warning-rules
+      type: string
+    - default: ''
+      description: Treat rules as info (comma-separated).
+      name: info-rules
+      type: string
+    - default: ''
+      description: Treat rules as style (comma-separated).
+      name: style-rules
+      type: string
+    - default: './Dockerfile'
+      description: Path to the Dockerfile.
+      name: dockerfile-path
+      type: string
+    - default: 'tty'
+      description: >-
+        The output format for the results [tty | json | checkstyle | codeclimate
+        | gitlab_codeclimate | codacy] (default tty).
+      name: output-format
+      type: string
+    - default: ''
+      description: >-
+        A comma-separated list of trusted registries to validate FROM instructions.
+      name: trusted-registries
+      type: string
+  steps:
+    - image: 'ghcr.io/hadolint/hadolint:v2.8.0-debian@sha256:50b0e60aa2b4aba5a26eeb4ad08c96ed7a828fca996632e29114aabea18345f4'
+      name: lint-dockerfile
+      script: |
+        #!/bin/bash
+        set -e
+        
+        # Process ignore rules
+        if [ -n "$IGNORE_RULES" ]; then
+          IFS="," read -a RULES <<< "$IGNORE_RULES"
+          for rule in "${RULES[@]}"; do ignore_flags="$ignore_flags --ignore $rule"; done
+        fi
+
+        # Process error rules
+        if [ -n "$ERROR_RULES" ]; then
+          IFS="," read -a RULES <<< "$ERROR_RULES"
+          for rule in "${RULES[@]}"; do error_flags="$error_flags --error $rule"; done
+        fi
+
+        # Process warning rules
+        if [ -n "$WARNING_RULES" ]; then
+          IFS="," read -a RULES <<< "$WARNING_RULES"
+          for rule in "${RULES[@]}"; do warning_flags="$warning_flags --warning $rule"; done
+        fi
+
+        # Process info rules
+        if [ -n "$INFO_RULES" ]; then
+          IFS="," read -a RULES <<< "$INFO_RULES"
+          for rule in "${RULES[@]}"; do info_flags="$info_flags --info $rule"; done
+        fi
+
+        # Process style rules
+        if [ -n "$STYLE_RULES" ]; then
+          IFS="," read -a RULES <<< "$STYLE_RULES"
+          for rule in "${RULES[@]}"; do style_flags="$style_flags --style $rule"; done
+        fi
+
+        # Process trusted registries
+        if [ -n "$TRUSTED_REGISTRIES" ]; then
+          IFS="," read -a REGISTRIES <<< "$TRUSTED_REGISTRIES"
+          for registry in "${REGISTRIES[@]}"; do registry_flags="$registry_flags --trusted-registry $registry"; done
+        fi
+
+        # Run hadolint with all flags
+        hadolint $ignore_flags $error_flags $warning_flags $info_flags $style_flags $registry_flags "$DOCKERFILE" -f "$OFORMAT"
+      env:
+      - name: IGNORE_RULES
+        value: "$(params.ignore-rules)"
+      - name: ERROR_RULES
+        value: "$(params.error-rules)"
+      - name: WARNING_RULES
+        value: "$(params.warning-rules)"
+      - name: INFO_RULES
+        value: "$(params.info-rules)"
+      - name: STYLE_RULES
+        value: "$(params.style-rules)"
+      - name: TRUSTED_REGISTRIES
+        value: "$(params.trusted-registries)"
+      - name: DOCKERFILE
+        value: "$(params.dockerfile-path)"
+      - name: OFORMAT
+        value: "$(params.output-format)"
+      workingDir: $(workspaces.source.path)
+  workspaces:
+    - description: A workspace that contains fetched git repo.
+      name: source
+---

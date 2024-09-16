@@ -1,0 +1,12 @@
+trustedRegistries:
+  - registry.redhat.io
+  - registry.access.redhat.com
+
+ignored:
+  - DL3001
+
+override:
+  error:
+    - DL3002
+    - DL3006
+    - DL3007
