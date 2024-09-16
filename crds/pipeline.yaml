@@ -1,3 +1,4 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
@@ -5,29 +6,37 @@ metadata:
 spec:
   params:
     - name: repository
-      description: "URL of the git repository"
+      description: "URL of the git repository (required)"
       type: string
+      default: 'https://github.com/redhat-lab-msoares94/tekton-hadolint.git'
     - name: containerfile-path
-      description: "Path to the Dockerfile or Containerfile"
+      description: "Path to the Dockerfile or Containerfile (required)"
       type: string
+      default: './Containerfile'
     - name: ignore-rules
-      description: "Comma-separated list of rules to ignore"
+      description: "Comma-separated list of rules to ignore (optional)"
       type: string
+      default: ''
     - name: error-rules
-      description: "Comma-separated list of rules to treat as errors"
+      description: "Comma-separated list of rules to treat as errors (optional)"
       type: string
+      default: ''
     - name: warning-rules
-      description: "Comma-separated list of rules to treat as warnings"
+      description: "Comma-separated list of rules to treat as warnings (optional)"
       type: string
+      default: ''
     - name: info-rules
-      description: "Comma-separated list of rules to treat as info"
+      description: "Comma-separated list of rules to treat as info (optional)"
       type: string
+      default: ''
     - name: style-rules
-      description: "Comma-separated list of rules to treat as style"
+      description: "Comma-separated list of rules to treat as style (optional)"
       type: string
+      default: ''
     - name: trusted-registries
       description: "Comma-separated list of trusted registries"
       type: string
+      default: 'registry.redhat.io,registry.access.redhat.com'
   workspaces:
     - name: source
   tasks:
@@ -43,7 +52,6 @@ spec:
           value: $(params.repository)
         - name: deleteExisting
           value: "true"
-
     - name: hadolint
       taskRef:
         kind: ClusterTask
@@ -68,3 +76,4 @@ spec:
           value: $(params.containerfile-path)
         - name: trusted-registries
           value: $(params.trusted-registries)
+---
