@@ -42,7 +42,3 @@ Assim como no OpenShift, este comando aplicará todos os recursos em sequência,
 - **Pipeline (`pipeline.yaml`)**: Define o pipeline Tekton, que inclui a task do Hadolint e a tarefa de clonar o repositório.
 - **PipelineRun (`pipelinerun.yaml`)**: Define a execução do pipeline para verificar Dockerfiles.
 - **Hadolint Task (`hadolint.yaml`)**: (Opcional) Configurações específicas do Hadolint, se aplicável, ou ajustes na task para personalização.
-
----
-
-Com este ajuste, o **README** agora contém as informações necessárias sobre como aplicar os recursos utilizando os comandos `oc apply` e `kubectl apply`, além de uma descrição clara dos arquivos e de como eles são organizados e executados.
