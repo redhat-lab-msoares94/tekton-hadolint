@@ -39,9 +39,9 @@ spec:
       description: Treat rules as style (comma-separated).
       name: style-rules
       type: string
-    - default: './Dockerfile'
-      description: Path to the Dockerfile.
-      name: dockerfile-path
+    - default: './Containerfile'
+      description: Path to the Dockerfile or Containerfile.
+      name: containerfile-path
       type: string
     - default: 'tty'
       description: >-
@@ -98,7 +98,7 @@ spec:
         fi
 
         # Run hadolint with all flags
-        hadolint $ignore_flags $error_flags $warning_flags $info_flags $style_flags $registry_flags "$DOCKERFILE" -f "$OFORMAT"
+        hadolint $ignore_flags $error_flags $warning_flags $info_flags $style_flags $registry_flags "$CONTAINERFILE_PATH" -f "$OFORMAT"
       env:
       - name: IGNORE_RULES
         value: "$(params.ignore-rules)"
@@ -112,8 +112,8 @@ spec:
         value: "$(params.style-rules)"
       - name: TRUSTED_REGISTRIES
         value: "$(params.trusted-registries)"
-      - name: DOCKERFILE
-        value: "$(params.dockerfile-path)"
+      - name: CONTAINERFILE_PATH
+        value: "$(params.containerfile-path)"
       - name: OFORMAT
         value: "$(params.output-format)"
       workingDir: $(workspaces.source.path)
